@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Администрирование Transporter</title>
+  <style>
+    body { font-family: sans-serif; margin: 20px; }
+    table { border-collapse: collapse; }
+    table, th, td { border: 1px solid #444; }
+    th, td { padding: 8px; }
+    .busy { background-color: red; } /* Красный фон для Busy */
+    .free { background-color: #d4f7d4; } /* Зелёный фон для Free */
+    #audit-box {
+      width: 100%; 
+      height: 300px; 
+      background: #f4f4f4; 
+      white-space: pre; 
+      overflow: auto; 
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Администрирование Transporter</h1>
+
+  <section>
+    <h2>Список транспортных средств</h2>
+    <button onclick="loadVehicles()">Обновить список</button>
+    <br/><br/>
+    <table id="vehicles-table">
+      <thead>
+        <tr>
+          <th>Идентификатор</th>
+          <th>Статус</th>
+          <th>Текущее местоположение</th>
+        </tr>
+      </thead>
+      <tbody id="vehicles-table-body">
+        <!-- Заполняется скриптом -->
+      </tbody>
+    </table>
+  </section>
+
+  <section style="margin-top: 2rem;">
+    <h2>Журнал аудита</h2>
+    <button onclick="loadAudit()">Показать журнал аудита</button>
+    <div id="audit-box">(Журнал не загружен)</div>
+  </section>
+
+  <script>
+    async function loadVehicles() {
+      try {
+        const response = await fetch("/admin/vehicles");
+        if (!response.ok) {
+          alert("Ошибка при получении списка машин: " + response.status);
+          return;
+        }
+        const data = await response.json();
+        const vehicles = data.vehicles || [];
+
+        const tableBody = document.getElementById("vehicles-table-body");
+        tableBody.innerHTML = ""; // очищаем таблицу
+
+        vehicles.forEach((v) => {
+          // Если current_node == "в пути", статус "Busy"
+          // иначе "Free"
+          let status = (v.current_node === "в пути") ? "Busy" : "Free";
+          let rowClass = (status === "Busy") ? "busy" : "free";
+          let location = (status === "Busy") ? "-" : v.current_node;
+
+          const row = document.createElement("tr");
+          row.className = rowClass;
+
+          const idTd = document.createElement("td");
+          idTd.textContent = v.vehicle_id;
+
+          const statusTd = document.createElement("td");
+          statusTd.textContent = status;
+
+          const locationTd = document.createElement("td");
+          locationTd.textContent = location;
+
+          row.appendChild(idTd);
+          row.appendChild(statusTd);
+          row.appendChild(locationTd);
+
+          tableBody.appendChild(row);
+        });
+      } catch (err) {
+        alert("Ошибка: " + err);
+      }
+    }
+
+    async function loadAudit() {
+      try {
+        const resp = await fetch("/admin/audit");
+        if (!resp.ok) {
+          alert("Ошибка при получении аудита: " + resp.status);
+          return;
+        }
+        const data = await resp.json();
+        const lines = data.lines || [];
+        const box = document.getElementById("audit-box");
+        if (lines.length === 0) {
+          box.textContent = "(Нет записей)";
+        } else {
+          box.textContent = lines.join("\\n");
+        }
+      } catch (err) {
+        alert("Ошибка: " + err);
+      }
+    }
+
+    // При первой загрузке страницы автоматически загружаем список
+    loadVehicles();
+  </script>
+</body>
+</html>
