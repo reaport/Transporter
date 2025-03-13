@@ -42,7 +42,7 @@ if __name__ == "__main__":
     # Запуск uvicorn
     uvicorn.run(
         "app.main:app",
-        host="localhost",
+        host="0.0.0.0",
         port=8000,
         reload=True
     )
