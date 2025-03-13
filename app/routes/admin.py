@@ -39,7 +39,7 @@ async def get_audit():
     Возвращает содержимое audit.log в виде JSON-массива строк.
     Если файл не найден или пуст, возвращаем ["(Нет записей)"].
     """
-    logfile_path = "app/audit.log"  # Путь к вашему лог-файлу
+    logfile_path = "audit.log"  # Путь к вашему лог-файлу
     if os.path.exists(logfile_path):
         with open(logfile_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
