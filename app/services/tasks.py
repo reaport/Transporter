@@ -22,7 +22,7 @@ vehicle_node_mapping_place = {}    # { vehicle_id: { coords: plane_node_id } }
 
 # Вместимость по умолчанию
 vehicle_capacity = 150
-SPEED_CAR = 8  # м/с движение
+SPEED_CAR = 25  # м/с движение
 
 lock_object = Lock()
 
