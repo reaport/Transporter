@@ -4,7 +4,7 @@ import uvicorn
 import logging
 from fastapi import FastAPI
 
-from app.routes import transporter, admin
+from routes import transporter, admin
 
 def create_app() -> FastAPI:
     app = FastAPI(

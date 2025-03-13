@@ -3,13 +3,13 @@ import asyncio
 import logging
 from threading import Lock
 
-from app.services.ground_control import (
+from services.ground_control import (
     register_vehicle_async,
     get_route_async,
     get_permission_async,
     inform_about_arrival_async
 )
-from app.services.orchestrator import (
+from services.orchestrator import (
     start_boarding,
     finish_boarding,
     start_unboarding,

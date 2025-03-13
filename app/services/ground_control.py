@@ -5,7 +5,7 @@ import math
 import asyncio
 import logging
 
-from app.schemas import RegisterVehicleResponse, MoveResponse
+from schemas import RegisterVehicleResponse, MoveResponse
 
 # Пример: адреса, куда будем стучаться (меняются при необходимости)
 REGISTER_VEHICLE_URL = "https://ground-control.reaport.ru/register-vehicle"

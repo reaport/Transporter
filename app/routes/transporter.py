@@ -4,7 +4,7 @@ import logging
 from fastapi import APIRouter, HTTPException
 
 # Импортируем наши схемы из app.schemas
-from app.schemas import (
+from schemas import (
     LoadRequest,
     UploadRequest,
     TransporterResponse,
@@ -13,7 +13,7 @@ from app.schemas import (
 
 # Импортируем переменные и функцию "процесса" из tasks.py
 # (где хранится логика поездок и глобальные переменные)
-from app.services.tasks import (
+from services.tasks import (
     lock_object,
     vehicle_node_mapping,
     vehicle_node_mapping_place,
