@@ -44,7 +44,7 @@ async def process_transporter_task(
       5) Сообщить оркестратору, что мы закончили boarding/unboarding.
       6) Вернуться в гараж.
     """
-    vehicle_type = "transporter"
+    vehicle_type = "bus"
     vehicle_id = None
     garage_node = None
     plane_node = None
