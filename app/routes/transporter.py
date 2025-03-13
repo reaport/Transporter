@@ -27,7 +27,7 @@ router = APIRouter()
 # Логгер для обычных сообщений
 logger = logging.getLogger(__name__)
 # Логгер для аудита (будет записывать события в отдельный файл или канал)
-audit_logger = logging.getLogger("app.audit")
+audit_logger = logging.getLogger("audit")
 
 
 @router.post("/load", response_model=TransporterResponse)
@@ -110,7 +110,7 @@ async def unload_passengers(request: UploadRequest):
         )))
 
     if tasks:
-        asyncio.create_task(asyncio.gather(*tasks))
+        asyncio.gather(*tasks)
         logger.info("Запустили %d задач на перевозку (upload)", needed_cars)
 
     audit_logger.info("Ответ /upload: waiting=%s, needed_cars=%d", waiting, needed_cars)

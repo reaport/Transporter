@@ -28,7 +28,7 @@ if __name__ == "__main__":
     )
 
     # Создадим отдельный логгер для аудита, который пишет в файл
-    audit_logger = logging.getLogger("app.audit")
+    audit_logger = logging.getLogger("audit")
     audit_logger.setLevel(logging.INFO)
 
     # Хендлер в файл audit.log

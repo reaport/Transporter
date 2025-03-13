@@ -27,7 +27,7 @@ SPEED_CAR = 25  # м/с движение
 lock_object = Lock()
 
 logger = logging.getLogger(__name__)
-audit_logger = logging.getLogger("app.audit")
+audit_logger = logging.getLogger("audit")
 
 async def process_transporter_task(
     aircraft_id: str,
