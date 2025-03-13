@@ -33,7 +33,7 @@ class ErrorResponse(BaseModel):
 # Ответ от /register-vehicle
 class RegisterVehicleResponse(BaseModel):
     garrageNodeId: str
-    VehicleId: str
+    vehicleId: str
     serviceSpots: Dict[str, str]
 
 # Ответ от /move

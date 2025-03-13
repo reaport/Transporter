@@ -74,7 +74,7 @@ async def process_transporter_task(
             logger.error("Не удалось зарегистрировать новую машину (ответ ground-control).")
             return
 
-        vehicle_id = reg_resp.VehicleId
+        vehicle_id = reg_resp.vehicleId
         garage_node = reg_resp.garrageNodeId
         plane_node = reg_resp.serviceSpots.get(aircraft_coordinates)
 
@@ -95,6 +95,14 @@ async def process_transporter_task(
 
     # 2) Едем к самолёту
     route = await get_route_async(garage_node, plane_node)
+
+    # +++ Добавить здесь +++
+    if not route:
+        logger.error("[%s] Маршрут не найден. Возвращаем машину в гараж.", vehicle_id)
+        async with lock_object:  # Используем asyncio.Lock вместо threading.Lock
+            vehicle_node_mapping[vehicle_id] = garage_node
+        return
+
     if route:
         logger.info("[%s] Маршрут к самолёту: %s", vehicle_id, route)
         audit_logger.info("Машина %s -> к самолёту %s", vehicle_id, route)
@@ -132,6 +140,13 @@ async def process_transporter_task(
 
     # 6) Возвращаемся в гараж
     route_back = await get_route_async(plane_node, garage_node)
+
+    if not route_back:
+        logger.error("[%s] Обратный маршрут не найден. Возвращаем машину в гараж.", vehicle_id)
+        async with lock_object:
+            vehicle_node_mapping[vehicle_id] = garage_node
+        return
+
     if route_back:
         logger.info("[%s] Маршрут обратно: %s", vehicle_id, route_back)
         for i in range(len(route_back) - 1):
