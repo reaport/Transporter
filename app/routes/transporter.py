@@ -63,7 +63,7 @@ async def load_passengers(request: LoadRequest):
             aircraft_id=request.aircraft_id,
             aircraft_coordinates=request.aircraft_coordinates,
             passenger_count=request.passenger_count,
-            is_load=True
+            is_boarding=True
         )))
 
     # Не дожидаемся завершения тасков в рамках запроса, чтобы не блокировать
@@ -106,7 +106,7 @@ async def unload_passengers(request: UploadRequest):
             aircraft_id=request.aircraft_id,
             aircraft_coordinates=request.aircraft_coordinates,
             passenger_count=request.passenger_count,
-            is_load=False
+            is_boarding=False
         )))
 
     if tasks:
