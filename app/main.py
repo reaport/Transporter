@@ -32,7 +32,7 @@ if __name__ == "__main__":
     audit_logger.setLevel(logging.INFO)
 
     # Хендлер в файл audit.log
-    audit_file_handler = logging.FileHandler("app/audit.log", encoding="utf-8")
+    audit_file_handler = logging.FileHandler("audit.log", encoding="utf-8")
     audit_file_handler.setFormatter(logging.Formatter(
         fmt='[%(asctime)s] [%(levelname)s] [%(name)s] %(message)s',
         datefmt='%Y-%m-%d %H:%M:%S'
@@ -41,7 +41,7 @@ if __name__ == "__main__":
 
     # Запуск uvicorn
     uvicorn.run(
-        "app.main:app",
+        "main:app",
         host="0.0.0.0",
         port=8000,
         reload=True
