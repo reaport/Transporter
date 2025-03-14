@@ -20,6 +20,10 @@ from services.orchestrator import (
 vehicle_node_mapping = {}          # { vehicle_id: current_node }
 vehicle_node_mapping_place = {}    # { vehicle_id: { coords: plane_node_id } }
 
+# Учет состояния самолетов и машин
+aircraft_vehicles = {}             # { aircraft_id: set(vehicle_ids) }
+aircraft_status = {}               # { aircraft_id: {"status": "started/finished", "passenger_count": count} }
+
 # Вместимость по умолчанию
 vehicle_capacity = 150
 SPEED_CAR = 25  # м/с движение
@@ -117,12 +121,32 @@ async def process_transporter_task(
         logger.warning("[%s] Не смогли получить маршрут до самолёта.", vehicle_id)
 
     # 3) Сообщаем оркестратору, что мы начали boarding или unboarding
-    if is_boarding:
-        await start_boarding(aircraft_id)
-        logger.info("Начинаем посадку пассажиров (aircraft=%s)", aircraft_id)
+    # Добавляем машину в список обслуживающих этот самолет
+    is_first_vehicle = False
+    with lock_object:
+        if aircraft_id not in aircraft_vehicles:
+            aircraft_vehicles[aircraft_id] = set()
+            aircraft_status[aircraft_id] = {"status": "none", "passenger_count": 0}
+            is_first_vehicle = True
+        
+        aircraft_vehicles[aircraft_id].add(vehicle_id)
+        aircraft_status[aircraft_id]["passenger_count"] += passenger_count
+        
+    # Только первая машина отправляет уведомление о начале
+    if is_first_vehicle:
+        if is_boarding:
+            await start_boarding(aircraft_id)
+            logger.info("Начинаем посадку пассажиров (aircraft=%s)", aircraft_id)
+            with lock_object:
+                aircraft_status[aircraft_id]["status"] = "boarding"
+        else:
+            await start_unboarding(aircraft_id)
+            logger.info("Начинаем высадку пассажиров (aircraft=%s)", aircraft_id)
+            with lock_object:
+                aircraft_status[aircraft_id]["status"] = "unboarding"
     else:
-        await start_unboarding(aircraft_id)
-        logger.info("Начинаем высадку пассажиров (aircraft=%s)", aircraft_id)
+        logger.info("[%s] Присоединяется к %s самолета %s", 
+                   vehicle_id, "посадке" if is_boarding else "высадке", aircraft_id)
 
     # 4) Время посадки/высадки = passenger_count / 50 пассажиров/сек (без округления)
     operation_time = passenger_count / 50
@@ -131,12 +155,29 @@ async def process_transporter_task(
     await asyncio.sleep(operation_time)
 
     # 5) Сообщаем оркестратору, что закончили boarding/unboarding
-    if is_boarding:
-        await finish_boarding(aircraft_id, passenger_count)
-        logger.info("Завершили посадку (aircraft=%s, %d пассажиров)", aircraft_id, passenger_count)
+    is_last_vehicle = False
+    with lock_object:
+        # Удаляем машину из списка обслуживающих этот самолет
+        if aircraft_id in aircraft_vehicles:
+            aircraft_vehicles[aircraft_id].remove(vehicle_id)
+            # Если это последняя машина, отправляем уведомление о завершении
+            if not aircraft_vehicles[aircraft_id]:
+                is_last_vehicle = True
+                total_passengers = aircraft_status[aircraft_id]["passenger_count"]
+                # Очищаем данные по самолету
+                del aircraft_vehicles[aircraft_id]
+                del aircraft_status[aircraft_id]
+
+    if is_last_vehicle:
+        if is_boarding:
+            await finish_boarding(aircraft_id, total_passengers)
+            logger.info("Завершили посадку (aircraft=%s, %d пассажиров)", aircraft_id, total_passengers)
+        else:
+            await finish_unboarding(aircraft_id, total_passengers)
+            logger.info("Завершили высадку (aircraft=%s, %d пассажиров)", aircraft_id, total_passengers)
     else:
-        await finish_unboarding(aircraft_id, passenger_count)
-        logger.info("Завершили высадку (aircraft=%s, %d пассажиров)", aircraft_id, passenger_count)
+        logger.info("[%s] Завершил свою часть %s для самолета %s", 
+                   vehicle_id, "посадки" if is_boarding else "высадки", aircraft_id)
 
     # 6) Возвращаемся в гараж
     route_back = await get_route_async(plane_node, garage_node)

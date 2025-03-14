@@ -68,7 +68,7 @@ async def load_passengers(request: LoadRequest):
 
     # Не дожидаемся завершения тасков в рамках запроса, чтобы не блокировать
     if tasks:
-        asyncio.create_task(asyncio.gather(*tasks))
+        asyncio.gather(*tasks)
         logger.info("Запустили %d задач на перевозку (load)", needed_cars)
 
     # Логируем ответ
