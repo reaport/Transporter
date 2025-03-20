@@ -25,7 +25,7 @@ aircraft_vehicles = {}             # { aircraft_id: set(vehicle_ids) }
 aircraft_status = {}               # { aircraft_id: {"status": "started/finished", "passenger_count": count} }
 
 # Вместимость по умолчанию
-vehicle_capacity = 150
+vehicle_capacity = 400
 SPEED_CAR = 25  # м/с движение
 
 lock_object = Lock()
